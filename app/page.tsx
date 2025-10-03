@@ -22,6 +22,11 @@ export default function Home() {
     setPlayers(storage.getPlayers());
   };
 
+  const handleUpdatePlayer = (player: Player) => {
+    storage.updatePlayer(player.id, player);
+    setPlayers(storage.getPlayers());
+  };
+
   const handleDeletePlayer = (playerId: string) => {
     storage.deletePlayer(playerId);
     setPlayers(storage.getPlayers());
@@ -50,6 +55,9 @@ export default function Home() {
           <h1 className="text-4xl font-bold text-center mb-2">
             COD チーム分けアプリ
           </h1>
+          <p className="text-center text-muted-foreground">
+            プレイヤーを登録してバランスの取れたチームを作成
+          </p>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -65,6 +73,7 @@ export default function Home() {
               selectedPlayers={selectedPlayerIds}
               onToggleSelect={handleToggleSelect}
               onDelete={handleDeletePlayer}
+              onUpdate={handleUpdatePlayer}
             />
           </div>
 
