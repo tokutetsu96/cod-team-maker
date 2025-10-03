@@ -21,8 +21,8 @@ export default function TeamDisplay({
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>{teamName}</span>
+          <CardTitle className="flex flex-wrap items-center justify-between gap-2">
+            <span className="truncate">{teamName}</span>
             <div className="flex gap-2 text-sm font-normal">
               <Badge variant="outline">
                 AR: {team.arCount} / SMG: {team.smgCount}
