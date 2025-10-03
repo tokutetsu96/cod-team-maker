@@ -11,15 +11,15 @@ export const divideIntoTeams = (players: Player[]): [Team, Team] | null => {
   const arPlayers = players.filter((p) => p.weaponType === "AR");
   const smgPlayers = players.filter((p) => p.weaponType === "SMG");
 
-  // 武器種ごとにスキルレベルでソート（降順）
+  // ARは降順（強い順）、SMGは昇順（弱い順）にソート
   arPlayers.sort((a, b) => b.skillLevel - a.skillLevel);
-  smgPlayers.sort((a, b) => b.skillLevel - a.skillLevel);
+  smgPlayers.sort((a, b) => a.skillLevel - b.skillLevel);
 
   // 交互に振り分け（ジグザグ方式）
   const team1: Player[] = [];
   const team2: Player[] = [];
 
-  // ARを振り分け
+  // ARを振り分け（強い順から交互）
   arPlayers.forEach((player, index) => {
     if (index % 2 === 0) {
       team1.push(player);
@@ -28,7 +28,7 @@ export const divideIntoTeams = (players: Player[]): [Team, Team] | null => {
     }
   });
 
-  // SMGを振り分け
+  // SMGを振り分け（弱い順から交互）
   smgPlayers.forEach((player, index) => {
     if (index % 2 === 0) {
       team1.push(player);
