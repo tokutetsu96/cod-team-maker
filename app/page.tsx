@@ -2,36 +2,55 @@
 
 import { useEffect, useState } from "react";
 import { Player } from "@/lib/types";
-import { storage } from "@/lib/storage";
+import { supabaseStorage } from "@/lib/supabaseStorage";
 import PlayerForm from "@/components/PlayerForm";
 import PlayerList from "@/components/PlayerList";
 import TeamMaker from "@/components/TeamMaker";
+import { toast } from "sonner";
 
 export default function Home() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // 初回ロード時にlocalStorageからデータを取得
+  // 初回ロード時にSupabaseからデータを取得
   useEffect(() => {
-    const loadedPlayers = storage.getPlayers();
-    setPlayers(loadedPlayers);
+    loadPlayers();
   }, []);
 
-  const handleAddPlayer = (player: Player) => {
-    storage.addPlayer(player);
-    setPlayers(storage.getPlayers());
+  const loadPlayers = async () => {
+    setIsLoading(true);
+    const loadedPlayers = await supabaseStorage.getPlayers();
+    setPlayers(loadedPlayers);
+    setIsLoading(false);
   };
 
-  const handleUpdatePlayer = (player: Player) => {
-    storage.updatePlayer(player.id, player);
-    setPlayers(storage.getPlayers());
+  const handleAddPlayer = async (playerData: Omit<Player, "id">) => {
+    const newPlayer = await supabaseStorage.addPlayer(playerData);
+    if (newPlayer) {
+      setPlayers((prev) => [...prev, newPlayer]);
+    } else {
+      toast.error("プレイヤーの登録に失敗しました");
+    }
   };
 
-  const handleDeletePlayer = (playerId: string) => {
-    storage.deletePlayer(playerId);
-    setPlayers(storage.getPlayers());
-    // 削除されたプレイヤーが選択されていた場合は選択を解除
-    setSelectedPlayerIds((prev) => prev.filter((id) => id !== playerId));
+  const handleUpdatePlayer = async (player: Player) => {
+    const success = await supabaseStorage.updatePlayer(player.id, player);
+    if (success) {
+      setPlayers((prev) => prev.map((p) => (p.id === player.id ? player : p)));
+    } else {
+      toast.error("プレイヤーの更新に失敗しました");
+    }
+  };
+
+  const handleDeletePlayer = async (playerId: string) => {
+    const success = await supabaseStorage.deletePlayer(playerId);
+    if (success) {
+      setPlayers((prev) => prev.filter((p) => p.id !== playerId));
+      setSelectedPlayerIds((prev) => prev.filter((id) => id !== playerId));
+    } else {
+      toast.error("プレイヤーの削除に失敗しました");
+    }
   };
 
   const handleToggleSelect = (playerId: string) => {
@@ -47,6 +66,17 @@ export default function Home() {
   const selectedPlayers = players.filter((p) =>
     selectedPlayerIds.includes(p.id)
   );
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
