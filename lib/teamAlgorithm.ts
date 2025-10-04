@@ -2,38 +2,38 @@
 import { Player, Team } from "./types";
 
 export const divideIntoTeams = (players: Player[]): [Team, Team] | null => {
-  // 偶数チェック
-  if (players.length % 2 !== 0) {
+  // 8人チェック
+  if (players.length !== 8) {
     return null;
   }
 
-  // ARとSMGに分類
-  const arPlayers = players.filter((p) => p.weaponType === "AR");
-  const smgPlayers = players.filter((p) => p.weaponType === "SMG");
+  // スキルレベルでソート（降順 - 強い順）
+  const sortedPlayers = [...players].sort(
+    (a, b) => b.skillLevel - a.skillLevel
+  );
 
-  // ARは降順（強い順）、SMGは昇順（弱い順）にソート
-  arPlayers.sort((a, b) => b.skillLevel - a.skillLevel);
-  smgPlayers.sort((a, b) => a.skillLevel - b.skillLevel);
-
-  // 交互に振り分け（ジグザグ方式）
+  // ジグザグドラフト方式で振り分け
+  // 1番目 -> Team1, 2番目 -> Team2, 3番目 -> Team2, 4番目 -> Team1, ...
   const team1: Player[] = [];
   const team2: Player[] = [];
 
-  // ARを振り分け（強い順から交互）
-  arPlayers.forEach((player, index) => {
-    if (index % 2 === 0) {
-      team1.push(player);
+  sortedPlayers.forEach((player, index) => {
+    // ジグザグパターン: 0,3,4,7 -> Team1 / 1,2,5,6 -> Team2
+    const round = Math.floor(index / 2);
+    if (round % 2 === 0) {
+      // 偶数ラウンド: 最初のプレイヤーがTeam1
+      if (index % 2 === 0) {
+        team1.push(player);
+      } else {
+        team2.push(player);
+      }
     } else {
-      team2.push(player);
-    }
-  });
-
-  // SMGを振り分け（弱い順から交互）
-  smgPlayers.forEach((player, index) => {
-    if (index % 2 === 0) {
-      team1.push(player);
-    } else {
-      team2.push(player);
+      // 奇数ラウンド: 最初のプレイヤーがTeam2
+      if (index % 2 === 0) {
+        team2.push(player);
+      } else {
+        team1.push(player);
+      }
     }
   });
 

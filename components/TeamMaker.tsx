@@ -181,14 +181,14 @@ export default function TeamMaker({ selectedPlayers }: TeamMakerProps) {
           <div className="flex gap-3">
             <Button
               onClick={handleDivideTeams}
-              className="flex-1"
+              className="flex-1 cursor-pointer"
               variant="outline"
             >
               やり直し
             </Button>
             <Button
               onClick={handleReset}
-              className="flex-1"
+              className="flex-1 cursor-pointer"
               variant="secondary"
             >
               リセット

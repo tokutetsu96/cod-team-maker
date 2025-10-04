@@ -1,8 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { Team, Player } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Copy, Check } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface TeamDisplayProps {
   team1: Team;
@@ -17,6 +22,29 @@ export default function TeamDisplay({
   onPlayerClick,
   selectedPlayer,
 }: TeamDisplayProps) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    // チーム結果をテキスト形式で生成
+    const team1Text = team1.players
+      .map((p) => `${p.name}(${p.weaponType})`)
+      .join("/");
+    const team2Text = team2.players
+      .map((p) => `${p.name}(${p.weaponType})`)
+      .join("/");
+
+    const text = `チーム1: ${team1Text}\nチーム2: ${team2Text}`;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      toast.success("クリップボードにコピーしました");
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      toast.error("コピーに失敗しました");
+    }
+  };
+
   const renderTeam = (team: Team, teamIndex: 1 | 2, teamName: string) => {
     return (
       <Card>
@@ -75,9 +103,36 @@ export default function TeamDisplay({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {renderTeam(team1, 1, "Team 1")}
-      {renderTeam(team2, 2, "Team 2")}
+    <div className="space-y-4">
+      {/* コピーボタン */}
+      <Card>
+        <CardContent className="pt-6">
+          <Button
+            onClick={handleCopy}
+            variant="outline"
+            className="w-full cursor-pointer"
+            disabled={copied}
+          >
+            {copied ? (
+              <>
+                <Check className="mr-2 h-4 w-4" />
+                コピーしました
+              </>
+            ) : (
+              <>
+                <Copy className="mr-2 h-4 w-4" />
+                チーム結果をコピー
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* チーム表示 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {renderTeam(team1, 1, "チーム1")}
+        {renderTeam(team2, 2, "チーム2")}
+      </div>
     </div>
   );
 }
