@@ -128,9 +128,6 @@ export default function PlayerList({
                             {player.weaponType}
                           </Badge>
                         </div>
-                        <div className="text-sm text-muted-foreground mt-1">
-                          スキル: {player.skillLevel}/10
-                        </div>
                       </div>
                     </div>
                     <div className="flex gap-2">
